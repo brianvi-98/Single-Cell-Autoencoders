@@ -42,7 +42,6 @@ def main(targets):
         loss_test_gex = predict_mod(gex_model,test_data_gex).item()
         print("loss of gex test set: " +str(loss_test_gex))
         return loss_test_adt,loss_test_gex
-    print('hi')
 
 if __name__ == '__main__':
     # run via:
