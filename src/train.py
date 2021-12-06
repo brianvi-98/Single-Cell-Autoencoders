@@ -1,6 +1,7 @@
 
 import sys
 import os
+import json
 
 
 import anndata as ad
@@ -15,6 +16,13 @@ import torch.nn as nn
 import torch.optim as optim
 from scipy import sparse
 from model import AE_gex,AE_adt
+
+with open('config/train-params.json') as fh:
+    train_cfg = json.load(fh)
+
+epoch_gex = train_cfg['epoch_count_gex']
+epoch_adt = train_cfg['epoch_count_adt']
+batch_size = train_cfg['batch_size']
 
 def pairwise_loss(code,curbatch):
     d_embedding = torch.pdist(code)
@@ -35,18 +43,18 @@ def get_train_gex(df):
 
     x,y = [],[]
     num_points =df.shape[0]
-    for epoch in range(2000):
+    for epoch in range(epoch_gex):
         loss = 0
         permutation = torch.randperm(df.shape[0])
-        for i in range(0,num_points,100):
-            indices = permutation[i:i+100]
+        for i in range(0,num_points,batch_size):
+            indices = permutation[i:i+batch_size]
             cur_batch = df[indices]
          
             optimizer_gex.zero_grad()
             
            
-            outputs = model(cur_batch)[1]
-            code_output = model(cur_batch)[0]
+            outputs = mod(cur_batch)[1]
+            code_output = mod(cur_batch)[0]
             
             train_loss = criterion_mse(outputs, cur_batch)
         
@@ -77,12 +85,12 @@ def get_train_adt(df):
     criterion_pairwise = pairwise_loss
 
     x,y = [],[]
-    for epoch in range(1000):
+    for epoch in range(epoch_adt):
         loss = 0
         num_points = df.shape[0]
         permutation = torch.randperm(num_points)
-        for i in range(0,num_points,100):
-            indices = permutation[i:i+100]
+        for i in range(0,num_points,batch_size):
+            indices = permutation[i:i+batch_size]
             cur_batch = df[indices]
             optimizer_adt.zero_grad()
             

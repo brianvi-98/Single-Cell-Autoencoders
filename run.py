@@ -13,7 +13,12 @@ from train import get_train_gex, get_train_adt
 
 adt_model = None
 gex_model = None
+with open('config/train-params.json') as fh:
+    train_cfg = json.load(fh)
 
+epoch_gex = train_cfg['epoch_count_gex']
+epoch_adt = train_cfg['epoch_count_adt']
+batch_size = train_cfg['batch_size']
 def main(targets):
     if 'test' in targets:
         with open('config/data-params.json') as fh:
