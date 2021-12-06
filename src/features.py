@@ -15,7 +15,7 @@ import torch.optim as optim
 from sklearn.metrics.pairwise import euclidean_distances
 from scipy import sparse
 
-
+# helper function to convert matrix to torch tensor
 def convert_sparse_matrix_to_sparse_tensor(X):
     coo = X.tocoo()
     values = coo.data

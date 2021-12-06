@@ -23,9 +23,11 @@ import torch.optim as optim
 from sklearn.metrics.pairwise import euclidean_distances
 from scipy import sparse
 
+# create ADT autoencoder model
 class AE_adt(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
+        # create layers
         self.encoder_hidden_layer = nn.Linear(in_features=kwargs["input_shape"], out_features=100)
         self.encoder_output_layer100 = nn.Linear(in_features=100, out_features=64)
         self.normalize = nn.LayerNorm(64)
@@ -39,6 +41,7 @@ class AE_adt(nn.Module):
         self.decoder_output_layer = nn.Linear(in_features=100, out_features=kwargs["input_shape"])
 
     def forward(self, features):
+        # create network
         activation = self.encoder_hidden_layer(features)
         activation = torch.relu(activation)
         activation = self.encoder_output_layer100(activation)
@@ -59,9 +62,11 @@ class AE_adt(nn.Module):
         
         activation = self.decoder_output_layer(activation)
         return [code,activation]
+# create GEX autoencoder model
 class AE_gex(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
+        # create layers
         self.encoder_hidden_layer256 = nn.Linear(in_features=kwargs["input_shape"], out_features=1000)
         self.normalize = nn.LayerNorm(1000)
         self.encoder_hidden_layer128 = nn.Linear(in_features=1000, out_features=128)
@@ -74,6 +79,7 @@ class AE_gex(nn.Module):
         self.decoder_output_layer = nn.Linear(in_features=1000, out_features=kwargs["input_shape"])
 
     def forward(self, features):
+        # create network
         activation = self.encoder_hidden_layer256(features)
         activation = torch.relu(activation)
         activation = self.normalize(activation)
@@ -91,11 +97,7 @@ class AE_gex(nn.Module):
         reconstructed = torch.relu(activation)
         return [code,activation]
     
-def my_loss_test(code,curbatch):
-    torch_dist_matrix = torch.cdist(cur_batch,cur_batch)
-    D = (torch.cdist(code,code))
-    return (1/code.shape[0])*torch.sum(torch.absolute(torch_dist_matrix-D))    
-
+#compute reconstruction loss
 def predict_mod(mod,test_data):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     prediction = mod(test_data.to(device))[1]
