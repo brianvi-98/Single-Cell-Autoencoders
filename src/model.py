@@ -25,7 +25,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style='ticks')
 from sklearn.metrics import mean_squared_error
-#import umap
 from tensorflow import keras
 
 from keras.models import Model
@@ -45,35 +44,72 @@ import torch.optim as optim
 from sklearn.metrics.pairwise import euclidean_distances
 from scipy import sparse
 
-class AE(nn.Module):
+class AE_adt(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
         #self.encoder_hidden_layer5000 = nn.Linear(in_features=kwargs["input_shape"], out_features=5000)
         
-        self.encoder_hidden_layer = nn.Linear(in_features=kwargs["input_shape"], out_features=250)
-        self.encoder_output_layer = nn.Linear(in_features=250, out_features=2)
+        self.encoder_hidden_layer1 = nn.Linear(in_features=kwargs["input_shape"], out_features=80)
+        self.encoder_hidden_layer2 = nn.Linear(in_features=80, out_features=40)
+        self.encoder_output_layer = nn.Linear(in_features=40, out_features=2)
         
-        self.decoder_hidden_layer = nn.Linear(in_features=2, out_features=250)
+        self.decoder_hidden_layer1 = nn.Linear(in_features=2, out_features=40)
         #self.decoder_hidden_layer5000 = nn.Linear(in_features=250, out_features=5000)
-        self.decoder_output_layer = nn.Linear(in_features=250, out_features=kwargs["input_shape"])
+        self.decoder_hidden_layer2 = nn.Linear(in_features=40, out_features=80)
+        self.decoder_output_layer = nn.Linear(in_features=80, out_features=kwargs["input_shape"])
 
     def forward(self, features):
         #activation = self.encoder_hidden_layer5000(features)
         #activation = torch.relu(activation)
         
-        activation = self.encoder_hidden_layer(features)
+        activation = self.encoder_hidden_layer1(features)
+        activation = torch.relu(activation)
+        activation = self.encoder_hidden_layer2(activation)
         activation = torch.relu(activation)
         code = self.encoder_output_layer(activation)
-        code = torch.relu(code)
-        activation = self.decoder_hidden_layer(code)
+#         code = torch.relu(code)
+        activation = self.decoder_hidden_layer1(code)
+        activation = torch.relu(activation)
+        activation = self.decoder_hidden_layer2(activation)
         activation = torch.relu(activation)
         
         #activation = self.decoder_hidden_layer5000(activation)
         #activation = torch.relu(activation)
         
         activation = self.decoder_output_layer(activation)
+#         reconstructed = torch.relu(activation)
+        return [code, activation]
+class AE_gex(nn.Module):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.encoder_hidden_layer256 = nn.Linear(in_features=kwargs["input_shape"], out_features=1000)
+        self.normalize = nn.LayerNorm(1000)
+        self.encoder_hidden_layer128 = nn.Linear(in_features=1000, out_features=128)
+        self.encoder_hidden_layer64 = nn.Linear(in_features=128, out_features=64)
+        self.encoder_output_layer = nn.Linear(in_features=64, out_features=2)
+        
+        self.decoder_hidden_layer = nn.Linear(in_features=2, out_features=64)
+        self.decoder_hidden_layer64d = nn.Linear(in_features=64, out_features=128)
+        self.decoder_hidden_layer128d = nn.Linear(in_features=128, out_features=1000)
+        self.decoder_output_layer = nn.Linear(in_features=1000, out_features=kwargs["input_shape"])
+
+    def forward(self, features):
+        activation = self.encoder_hidden_layer256(features)
+        activation = torch.relu(activation)
+        activation = self.normalize(activation)
+        activation = self.encoder_hidden_layer128(activation)
+        activation = torch.relu(activation)
+        activation = self.encoder_hidden_layer64(activation)
+        code = self.encoder_output_layer(activation)
+        activation = self.decoder_hidden_layer(code)
+        activation = torch.relu(activation)
+        activation = self.decoder_hidden_layer64d(activation)
+        activation = torch.relu(activation)
+        activation = self.decoder_hidden_layer128d(activation)
+        activation = torch.relu(activation)    
+        activation = self.decoder_output_layer(activation)
         reconstructed = torch.relu(activation)
-        return [code,reconstructed]
+        return [code,activation]
     
 def my_loss_test(code,curbatch):
     torch_dist_matrix = torch.cdist(cur_batch,cur_batch)
