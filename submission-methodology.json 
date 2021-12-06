@@ -1,0 +1,4 @@
+{
+    "dockerhub-id": "alandnin/method3:latest",
+    "build-script": "python run.py"
+}
