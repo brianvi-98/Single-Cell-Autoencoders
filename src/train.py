@@ -85,7 +85,7 @@ def get_train_adt(df):
     criterion_pairwise = pairwise_loss
 
     x,y = [],[]
-    for epoch in range(epoch_adt):
+    for epoch in range(4):
         loss = 0
         num_points = df.shape[0]
         permutation = torch.randperm(num_points)

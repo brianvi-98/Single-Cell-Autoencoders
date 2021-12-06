@@ -6,38 +6,40 @@ import json
 
 sys.path.insert(0, 'src')
 
-from etl import read_data
-from model import build_model, train_model, predict_mod
+from etl import read_data,get_data_test_adt
+from model import predict_mod
 from features import convert_sparse_matrix_to_sparse_tensor
 from train import get_train_gex, get_train_adt
+import torch
 
-adt_model = None
-gex_model = None
-with open('config/train-params.json') as fh:
-    train_cfg = json.load(fh)
 
-epoch_gex = train_cfg['epoch_count_gex']
-epoch_adt = train_cfg['epoch_count_adt']
-batch_size = train_cfg['batch_size']
+
 def main(targets):
+    adt_model = None
+    gex_model = None
     if 'test' in targets:
         with open('config/data-params.json') as fh:
             data_cfg = json.load(fh)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")    
          
         data_gex = read_data(**data_cfg, file='train_data_gex.npz')
         data_adt = read_data(**data_cfg, file='train_data_adt.npz')
+    
+        torch_gex_data = convert_sparse_matrix_to_sparse_tensor(data_gex).to(device)
+        torch_adt_data = convert_sparse_matrix_to_sparse_tensor(data_adt).to(device)
+            
+        #if gex_model == None:
+            #gex_model = get_train_gex(torch_gex_data)
+            
+        if adt_model== None:
+            adt_model = get_train_adt(torch_adt_data)
         
-        torch_gex_data = convert_sparse_matrix_to_sparse_tensor(data_gex)
-        torch_adt_data = convert_sparse_matrix_to_sparse_tensor(data_adt)
-        train_data = get_train_adt(torch_adt_data)
-        #test_data = get_data_test()
-        
-        torch_train_data = convert_sparse_matrix_to_sparse_tensor(train_data)
+
+        test_data_adt= get_data_test_adt()
         
         
-        torch_test_data = convert_sparse_matrix_to_sparse_tensor(test_data)
-        mod = train_model(torch_train_data)
-        loss_test = predict_mod(mod,torch_test_data).item()
+        torch_test_data_adt = convert_sparse_matrix_to_sparse_tensor(test_data_adt)
+        loss_test = predict_mod(adt_model,torch_test_data_adt).item()
         print("loss of test set: " +str(loss_test))
         return loss_test
     print('hi')
