@@ -1,47 +1,18 @@
-from scipy import sparse
+
 import sys
 import os
-import json
 
 
 import anndata as ad
 import numpy as np
 import pandas as pd
-import logging
-from sklearn.decomposition import TruncatedSVD
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
-import random
 
-import anndata as ad
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-from sklearn.manifold import Isomap
-from sklearn.manifold import TSNE
-
-import plotly.io as plt_io
-import plotly.graph_objects as go
-import matplotlib.pyplot as plt
-import seaborn as sns
-sns.set(style='ticks')
-from sklearn.metrics import mean_squared_error
-from tensorflow import keras
-
-from keras.models import Model
-from keras.layers import Dense, Input
-from keras.regularizers import l1
-from tensorflow.keras.optimizers import Adam 
-import tensorflow as tf
-tf.config.run_functions_eagerly(True)
-
-import torch
 
 import matplotlib.pyplot as plt
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from sklearn.metrics.pairwise import euclidean_distances
 from scipy import sparse
 from model import AE_gex,AE_adt
 
@@ -74,8 +45,8 @@ def get_train_gex(df):
             optimizer_gex.zero_grad()
             
            
-            outputs = model_gex(cur_batch)[1]
-            code_output = model_gex(cur_batch)[0]
+            outputs = model(cur_batch)[1]
+            code_output = model(cur_batch)[0]
             
             train_loss = criterion_mse(outputs, cur_batch)
         
@@ -115,8 +86,8 @@ def get_train_adt(df):
             cur_batch = df[indices]
             optimizer_adt.zero_grad()
             
-            outputs = model_adt(cur_batch)[1]
-            code_output = model_adt(cur_batch)[0]
+            outputs = mod(cur_batch)[1]
+            code_output = mod(cur_batch)[0]
             
             train_loss_mse = criterion_mse(outputs, cur_batch)
             train_loss = criterion_pairwise(code_output,cur_batch)+train_loss_mse
@@ -131,7 +102,8 @@ def get_train_adt(df):
         
         # total loss for epoch
         loss = loss / num_points
-        
+        print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, 5, loss))
+
         x.append(loss)
         y.append(epoch+1)
     return mod
