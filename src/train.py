@@ -38,8 +38,7 @@ def get_train_gex(df):
     mod = AE_gex(input_shape=df.shape[1]).to(device)
     optimizer_gex = optim.Adam(mod.parameters(), lr=1e-4)
     criterion_mse = nn.MSELoss()
-    criterion = my_loss_test
-    criterion_pairwise = pairwise
+    criterion_pairwise = pairwise_loss
 
     x,y = [],[]
     num_points =df.shape[0]
@@ -70,7 +69,7 @@ def get_train_gex(df):
         loss = loss / num_points
         
         
-        #print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, 5, loss))
+        print("gex epoch : {}/{}, loss = {:.6f}".format(epoch + 1, 5, loss))
         x.append(loss)
         y.append(epoch+1)
 
@@ -85,7 +84,7 @@ def get_train_adt(df):
     criterion_pairwise = pairwise_loss
 
     x,y = [],[]
-    for epoch in range(4):
+    for epoch in range(epoch_adt):
         loss = 0
         num_points = df.shape[0]
         permutation = torch.randperm(num_points)
@@ -110,7 +109,7 @@ def get_train_adt(df):
         
         # total loss for epoch
         loss = loss / num_points
-        print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, 5, loss))
+        print("adt epoch : {}/{}, loss = {:.6f}".format(epoch + 1, 5, loss))
 
         x.append(loss)
         y.append(epoch+1)

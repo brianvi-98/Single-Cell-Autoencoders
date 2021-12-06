@@ -1,5 +1,5 @@
 {
-    "epoch_count_gex": 2000,
-    "epoch_count_adt": 1000,
+    "epoch_count_gex": 3,
+    "epoch_count_adt": 3,
     "batch_size": 100
 }

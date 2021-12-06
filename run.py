@@ -6,7 +6,7 @@ import json
 
 sys.path.insert(0, 'src')
 
-from etl import read_data,get_data_test_adt
+from etl import read_data,get_data_test_adt,get_data_test_gex
 from model import predict_mod
 from features import convert_sparse_matrix_to_sparse_tensor
 from train import get_train_gex, get_train_adt
@@ -20,28 +20,28 @@ def main(targets):
     if 'test' in targets:
         with open('config/data-params.json') as fh:
             data_cfg = json.load(fh)
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")    
          
         data_gex = read_data(**data_cfg, file='train_data_gex.npz')
         data_adt = read_data(**data_cfg, file='train_data_adt.npz')
     
-        torch_gex_data = convert_sparse_matrix_to_sparse_tensor(data_gex).to(device)
-        torch_adt_data = convert_sparse_matrix_to_sparse_tensor(data_adt).to(device)
             
-        #if gex_model == None:
-            #gex_model = get_train_gex(torch_gex_data)
+        if gex_model == None:
+            gex_model = get_train_gex(data_gex)
             
         if adt_model== None:
-            adt_model = get_train_adt(torch_adt_data)
+            adt_model = get_train_adt(data_adt)
         
 
         test_data_adt= get_data_test_adt()
-        
-        
-        torch_test_data_adt = convert_sparse_matrix_to_sparse_tensor(test_data_adt)
-        loss_test = predict_mod(adt_model,torch_test_data_adt).item()
-        print("loss of test set: " +str(loss_test))
-        return loss_test
+        test_data_gex = get_data_test_gex()
+
+     
+        loss_test_adt = predict_mod(adt_model,test_data_adt).item()
+        print("loss of adt test set: " +str(loss_test_adt))
+
+        loss_test_gex = predict_mod(gex_model,test_data_gex).item()
+        print("loss of gex test set: " +str(loss_test_gex))
+        return loss_test_adt,loss_test_gex
     print('hi')
 
 if __name__ == '__main__':
