@@ -47,38 +47,39 @@ from scipy import sparse
 class AE_adt(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
-        #self.encoder_hidden_layer5000 = nn.Linear(in_features=kwargs["input_shape"], out_features=5000)
+        self.encoder_hidden_layer = nn.Linear(in_features=kwargs["input_shape"], out_features=100)
+        self.encoder_output_layer100 = nn.Linear(in_features=100, out_features=64)
+        self.normalize = nn.LayerNorm(64)
+        self.encoder_output_layer64 = nn.Linear(in_features=64, out_features=32)
         
-        self.encoder_hidden_layer1 = nn.Linear(in_features=kwargs["input_shape"], out_features=80)
-        self.encoder_hidden_layer2 = nn.Linear(in_features=80, out_features=40)
-        self.encoder_output_layer = nn.Linear(in_features=40, out_features=2)
+        self.encoder_output_layer32 = nn.Linear(in_features=32, out_features=2)
         
-        self.decoder_hidden_layer1 = nn.Linear(in_features=2, out_features=40)
-        #self.decoder_hidden_layer5000 = nn.Linear(in_features=250, out_features=5000)
-        self.decoder_hidden_layer2 = nn.Linear(in_features=40, out_features=80)
-        self.decoder_output_layer = nn.Linear(in_features=80, out_features=kwargs["input_shape"])
+        self.decoder_hidden_layer32d = nn.Linear(in_features=2, out_features=32)
+        self.decoder_hidden_layer64d = nn.Linear(in_features=32, out_features=64)
+        self.decoder_hidden_layer100d = nn.Linear(in_features=64, out_features=100)
+        self.decoder_output_layer = nn.Linear(in_features=100, out_features=kwargs["input_shape"])
 
     def forward(self, features):
-        #activation = self.encoder_hidden_layer5000(features)
-        #activation = torch.relu(activation)
-        
-        activation = self.encoder_hidden_layer1(features)
+        activation = self.encoder_hidden_layer(features)
         activation = torch.relu(activation)
-        activation = self.encoder_hidden_layer2(activation)
-        activation = torch.relu(activation)
-        code = self.encoder_output_layer(activation)
-#         code = torch.relu(code)
-        activation = self.decoder_hidden_layer1(code)
-        activation = torch.relu(activation)
-        activation = self.decoder_hidden_layer2(activation)
+        activation = self.encoder_output_layer100(activation)
         activation = torch.relu(activation)
         
-        #activation = self.decoder_hidden_layer5000(activation)
-        #activation = torch.relu(activation)
+        activation = self.normalize (activation)
+        
+        activation = self.encoder_output_layer64(activation)
+        activation = torch.relu(activation)
+        code = self.encoder_output_layer32(activation)
+        
+        activation = self.decoder_hidden_layer32d(code)
+        activation = torch.relu(activation)
+        activation = self.decoder_hidden_layer64d(activation)
+        activation = torch.relu(activation)
+        activation = self.decoder_hidden_layer100d(activation)
+        activation = torch.relu(activation)
         
         activation = self.decoder_output_layer(activation)
-#         reconstructed = torch.relu(activation)
-        return [code, activation]
+        return [code,activation]
 class AE_gex(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
