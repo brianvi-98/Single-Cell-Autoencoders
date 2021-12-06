@@ -6,12 +6,22 @@ import json
 
 sys.path.insert(0, 'src')
 
-from etl import get_data_test,get_data_train
-from model import build_model,train_model,predict_mod
+from etl import read_data
+from model import build_model, train_model, predict_mod
 from features import convert_sparse_matrix_to_sparse_tensor
-from train import get_train_gex,get_train_adt
+from train import get_train_gex, get_train_adt
+
+adt_model = None
+gex_model = None
+
 def main(targets):
     if 'test' in targets:
+        with open('config/data-params.json') as fh:
+            data_cfg = json.load(fh)
+         
+        data_gex = read_data(**data_cfg, file='train_data_gex.npz')
+        data_adt = read_data(**data_cfg, file='train_data_adt.npz')
+        
         train_data = get_data_train()
         test_data = get_data_test()
         
